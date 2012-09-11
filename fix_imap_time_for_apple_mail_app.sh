@@ -23,6 +23,16 @@ function usage() {
   exit 1
 }
 
+function email_date() {
+  local DATELINE=`grep -e "^Date: " "$1" | head -1`
+
+  local regex='^Date: (.*)$'
+  if [[ $DATELINE =~ $regex ]]; then
+    EDATE=`date -d "${BASH_REMATCH[1]}" "+%Y%m%d%H%M"`
+    return 0
+  fi
+}
+
 MDIR_PATH="$1"
 
 [ $# -lt 1 ] && usage
@@ -39,7 +49,7 @@ set -f
 echo "start"
 # Find all emails
 for i in `find $MDIR_PATH -type f | egrep -v "(courierimap|maildirsize|maildirfolder)"`; do
-  EDATE=`awk '/^Date: [A-Za-z]*,/ {print $4,$3,$5,$6}' "$i" | head -1`
+  email_date "$i"
   if [ -z "$EDATE" ]; then
     echo ""
     echo "Unparsable date for" `basename $i`
@@ -47,16 +57,15 @@ for i in `find $MDIR_PATH -type f | egrep -v "(courierimap|maildirsize|maildirfo
   fi
   FDATE=`ls -l --time-style=long-iso "$i" | awk '{print $6,$7}'`
   # Reformat the date for touch.
-  NDATE=`date -d "$EDATE" "+%Y%m%d%H%M"`
   ODATE=`date -d "$FDATE" "+%Y%m%d%H%M"`
-  if [ "$NDATE" -eq "$ODATE" ]; then
+  if [ "$EDATE" -eq "$ODATE" ]; then
     # Skip it if the times are correct.
     echo -n "."
     continue
   fi
   echo ""
-  echo `basename $i` "from $ODATE to $NDATE"
-  touch -c -t "$NDATE" "$i"
+  echo `basename $i` "from $ODATE to $EDATE"
+  touch -c -t "$EDATE" "$i"
 done
 
 echo ""
