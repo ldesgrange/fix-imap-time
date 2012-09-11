@@ -54,6 +54,8 @@ do
   EDATE=`awk '/^Date: [A-Za-z]*,/ {print $4,$3,$5,$6}' "$i" | head -1`
   if [ -z "$EDATE" ]
   then
+    echo ""
+    echo "Unparsable date for" `basename $i`
     continue
   fi
   FDATE=`ls -l --time-style=long-iso "$i" | awk '{print $6,$7}'`
@@ -63,10 +65,13 @@ do
   if [ "$NDATE" -eq "$ODATE" ]
   then
     # Skip it if the times are correct.
-    echo -n "_"
+    echo -n "."
     continue
   fi
+  echo ""
   echo `basename $i` "from $ODATE to $NDATE"
   touch -c -t "$NDATE" "$i"
 done
+
+echo ""
 echo "done"
