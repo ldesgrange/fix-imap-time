@@ -26,6 +26,13 @@ function usage() {
 function email_date() {
   local DATELINE=`grep -e "^Date: " "$1" | head -1`
 
+  # Missing "+" before timezone
+  local regex='^Date: ([A-Za-z]*, [0-9]* [A-Za-z]* [0-9]{4} [0-9]{1,2}:[0-9]{2}:[0-9]{2}) ([0-9]{4})$'
+  if [[ $DATELINE =~ $regex ]]; then
+    EDATE=`date -d "${BASH_REMATCH[1]} +${BASH_REMATCH[2]}" "+%Y%m%d%H%M"`
+    return 0
+  fi
+
   local regex='^Date: (.*)$'
   if [[ $DATELINE =~ $regex ]]; then
     EDATE=`date -d "${BASH_REMATCH[1]}" "+%Y%m%d%H%M"`
