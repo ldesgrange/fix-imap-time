@@ -25,6 +25,10 @@ function usage() {
 
 function email_date() {
   local DATELINE=`grep -e "^Date: " "$1" | head -1`
+  local DELIVERYDATELINE=`grep -e "^Delivery-date: " "$1" | head -1`
+  if [ -n "$DELIVERYDATELINE" ]; then
+    local DATELINE="${DELIVERYDATELINE/elivery-d/}"
+  fi
 
   # Missing "+" before timezone
   local regex='^Date: ([A-Za-z]*, [0-9]* [A-Za-z]* [0-9]{4} [0-9]{1,2}:[0-9]{2}:[0-9]{2}) ([0-9]{4})$'
