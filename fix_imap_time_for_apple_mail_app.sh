@@ -31,7 +31,7 @@ function email_date() {
   fi
 
   # Fucked up date like Mon, 03 Nov 03 11:37:04 Romance Standard Time
-  local regex='^Date: ([A-Za-z]{3}, [0-9]{2} [A-Za-z]{3} [0-9]{2} [0-9]{1,2}:[0-9]{2}:[0-9]{2}) ([A-Za-z ]*)$'
+  local regex='^Date: ([A-Za-z]{3}, [0-9]{2} [A-Za-z]{3} [0-9]{2,4} [0-9]{1,2}:[0-9]{2}:[0-9]{2}) ([A-Za-z ]*)$'
   if [[ $DATELINE =~ $regex ]]; then
     EDATE=`date -d "${BASH_REMATCH[1]}" "+%Y%m%d%H%M"`
     return 0
