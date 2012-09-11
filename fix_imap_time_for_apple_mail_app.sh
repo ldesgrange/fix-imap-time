@@ -44,6 +44,13 @@ function email_date() {
     return 0
   fi
 
+  # Remove day of the week
+  local regex='^Date: ([A-Za-z]*,) (.*)$'
+  if [[ $DATELINE =~ $regex ]]; then
+    EDATE=`date -d "${BASH_REMATCH[2]}" "+%Y%m%d%H%M"`
+    return 0
+  fi
+
   local regex='^Date: (.*)$'
   if [[ $DATELINE =~ $regex ]]; then
     EDATE=`date -d "${BASH_REMATCH[1]}" "+%Y%m%d%H%M"`
