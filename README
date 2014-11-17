@@ -2,7 +2,7 @@ This shell script corrects email messages where the file system date does not ma
 
 This will fix problems with mail clients like Apple's mail.app which uses the file system timestamp resulting in emails with the wrong file system timestamp to display the wrong received date
 
-This script has to be run by a user [root] with the necessary privileges to read/modify files in a user's Maildir.
+This script has to be run by a user [root] with the necessary privileges to read/modify files in a user's Maildir. It has been successfully tested on Linux.
 
 Original author:  
 Date: July 4th, 2005  
