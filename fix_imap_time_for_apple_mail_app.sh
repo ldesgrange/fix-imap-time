@@ -14,6 +14,8 @@
 # This script has to be run by a user [root] with the
 # necessary privileges to read/modify files in a user's Maildir.
 #
+# To run this script on OSX, first install the coreutils macport
+#
 
 function usage() {
   if [ "$1" != "" ]; then
@@ -33,32 +35,42 @@ function email_date() {
   # Fucked up date like Mon, 03 Nov 03 11:37:04 Romance Standard Time
   local regex='^Date: ([A-Za-z]{3}, [0-9]{2} [A-Za-z]{3} [0-9]{2,4} [0-9]{1,2}:[0-9]{2}:[0-9]{2}) ([A-Za-z ]*)$'
   if [[ $DATELINE =~ $regex ]]; then
-    EDATE=`date -d "${BASH_REMATCH[1]}" "+%Y%m%d%H%M"`
+    EDATE=`$DATE -d "${BASH_REMATCH[1]}" "+%Y%m%d%H%M"`
     return 0
   fi
 
   # Missing "+" before timezone
   local regex='^Date: ([A-Za-z]*, [0-9]* [A-Za-z]* [0-9]{4} [0-9]{1,2}:[0-9]{2}:[0-9]{2}) ([0-9]{4})$'
   if [[ $DATELINE =~ $regex ]]; then
-    EDATE=`date -d "${BASH_REMATCH[1]} +${BASH_REMATCH[2]}" "+%Y%m%d%H%M"`
+    EDATE=`$DATE -d "${BASH_REMATCH[1]} +${BASH_REMATCH[2]}" "+%Y%m%d%H%M"`
     return 0
   fi
 
   # Remove day of the week
   local regex='^Date: ([A-Za-z]*,) (.*)$'
   if [[ $DATELINE =~ $regex ]]; then
-    EDATE=`date -d "${BASH_REMATCH[2]}" "+%Y%m%d%H%M"`
+    EDATE=`$DATE -d "${BASH_REMATCH[2]}" "+%Y%m%d%H%M"`
     return 0
   fi
 
   local regex='^Date: (.*)$'
   if [[ $DATELINE =~ $regex ]]; then
-    EDATE=`date -d "${BASH_REMATCH[1]}" "+%Y%m%d%H%M"`
+    EDATE=`$DATE -d "${BASH_REMATCH[1]}" "+%Y%m%d%H%M"`
     return 0
   fi
 }
 
 MDIR_PATH="$1"
+
+if [ -x `which gls` ]; then
+  LS=gls
+  DATE=gdate
+  AWK=gawk
+else
+  LS=ls
+  DATE=date
+  AWK=awk
+fi
 
 [ $# -lt 1 ] && usage
 [ ! -d "$MDIR_PATH" ] && usage "Error: $MDIR_PATH does not exist"
@@ -80,9 +92,9 @@ for i in `find $MDIR_PATH -type f | egrep -v "(courierimap|maildirsize|maildirfo
     echo "Unparsable date for" `basename $i`
     continue
   fi
-  FDATE=`ls -l --time-style=long-iso "$i" | awk '{print $6,$7}'`
+  FDATE=`$LS -l --time-style=long-iso "$i" | $AWK '{print $7,$8}'`
   # Reformat the date for touch.
-  ODATE=`date -d "$FDATE" "+%Y%m%d%H%M"`
+  ODATE=`$DATE -d "$FDATE" "+%Y%m%d%H%M"`
   if [ "$EDATE" -eq "$ODATE" ]; then
     # Skip it if the times are correct.
     echo -n "."
