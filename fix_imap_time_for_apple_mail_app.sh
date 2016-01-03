@@ -14,7 +14,8 @@
 # This script has to be run by a user [root] with the
 # necessary privileges to read/modify files in a user's Maildir.
 #
-# To run this script on OSX, first install the coreutils macport
+# To run this script on OSX, first install the coreutils and gawk
+# packages from Homebrew or MacPorts.
 #
 
 function usage() {
@@ -92,7 +93,7 @@ for i in `find $MDIR_PATH -type f | egrep -v "(courierimap|maildirsize|maildirfo
     echo "Unparsable date for" `basename $i`
     continue
   fi
-  FDATE=`$LS -l --time-style=long-iso "$i" | $AWK '{print $7,$8}'`
+  FDATE=`$LS -l --time-style=long-iso "$i" | $AWK '{print $6,$7}'`
   # Reformat the date for touch.
   ODATE=`$DATE -d "$FDATE" "+%Y%m%d%H%M"`
   if [ "$EDATE" -eq "$ODATE" ]; then
